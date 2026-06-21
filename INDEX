@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Air Force FIP Companion</title>
+<style>
+  :root{
+    --navy:#1F3864; --blue:#2E5496; --lt:#D6E2F0; --lt2:#EAF1FA;
+    --green:#1E7D34; --amber:#B88600; --red:#C0392B; --grey:#6B7280; --bg:#F4F6FA; --card:#fff;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bg);color:#1b2430}
+  header{background:var(--navy);color:#fff;padding:14px 16px;position:sticky;top:0;z-index:20}
+  header h1{margin:0;font-size:17px;letter-spacing:.3px}
+  header p{margin:2px 0 0;font-size:11px;color:#BDD0EE}
+  nav{display:flex;background:var(--blue);position:sticky;top:52px;z-index:19;overflow-x:auto}
+  nav button{flex:1 0 auto;background:none;border:none;color:#cfe0f5;padding:11px 12px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+  nav button.active{color:#fff;border-bottom:3px solid #fff;background:rgba(255,255,255,.08)}
+  main{padding:14px;max-width:1100px;margin:0 auto}
+  .tab{display:none}.tab.active{display:block}
+  .card{background:var(--card);border:1px solid #e2e8f2;border-radius:12px;padding:14px;margin-bottom:14px;box-shadow:0 1px 3px rgba(31,56,100,.06)}
+  .card h2{margin:0 0 10px;font-size:15px;color:var(--navy)}
+  .card h3{margin:0 0 6px;font-size:13px;color:var(--blue)}
+  label{display:block;font-size:12px;font-weight:600;color:#33415c;margin:10px 0 4px}
+  input,select,textarea{width:100%;padding:10px;border:1px solid #cdd6e5;border-radius:8px;font-size:15px;background:#fff;font-family:inherit}
+  textarea{min-height:54px;resize:vertical}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .btn{background:var(--navy);color:#fff;border:none;border-radius:9px;padding:12px 16px;font-size:15px;font-weight:700;cursor:pointer;width:100%;margin-top:12px}
+  .btn.alt{background:var(--blue)} .btn.ghost{background:#eef2f9;color:var(--navy)} .btn.danger{background:var(--red)}
+  .btn.small{width:auto;padding:8px 12px;font-size:13px;margin:0}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .chip{padding:8px 12px;border:1px solid #cdd6e5;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;user-select:none;background:#fff}
+  .chip.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+  .stat{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px dashed #e6ebf3;font-size:13px}
+  .stat b{font-size:15px}
+  .pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;color:#fff}
+  .good{background:var(--green)} .warn{background:var(--amber)} .bad{background:var(--red)} .neu{background:var(--grey)}
+  .delta{font-size:11px;font-weight:700;margin-left:6px}
+  .up{color:var(--green)} .down{color:var(--red)}
+  table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+  th,td{border:1px solid #e2e8f2;padding:6px 7px;text-align:left}
+  th{background:var(--navy);color:#fff;font-size:11px;position:sticky;top:0}
+  tr:nth-child(even) td{background:var(--lt2)}
+  .scroll{overflow:auto;max-height:60vh}
+  .muted{color:var(--grey);font-size:12px}
+  .athletehdr{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .dot{width:10px;height:10px;border-radius:50%}
+  /* HAMR */
+  #hamrStage{background:var(--navy);color:#fff;border-radius:14px;padding:18px;text-align:center}
+  #hamrBig{font-size:64px;font-weight:800;line-height:1;margin:6px 0}
+  #hamrSub{font-size:14px;color:#BDD0EE}
+  #runCue{height:14px;border-radius:7px;background:#3a567f;margin:14px 0;transition:background .08s}
+  #runCue.flash{background:#7CFF9E}
+  .hamrgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
+  .hbox{background:#284978;border-radius:10px;padding:10px}
+  .hbox .k{font-size:11px;color:#BDD0EE}.hbox .v{font-size:24px;font-weight:800}
+  .controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  details{margin-top:10px}summary{cursor:pointer;font-weight:700;color:var(--navy);font-size:13px}
+  .note{background:var(--lt2);border-left:4px solid var(--blue);padding:8px 10px;border-radius:6px;font-size:12px;margin-top:8px}
+  .saveflash{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 18px;border-radius:24px;font-weight:700;opacity:0;transition:opacity .25s;z-index:50}
+  .saveflash.show{opacity:1}
+  .progress{height:9px;background:#e6ebf3;border-radius:5px;overflow:hidden;margin:6px 0}
+  .progress > i{display:block;height:100%;background:var(--green);transition:width .2s}
+  .witem{display:flex;align-items:flex-start;gap:11px;padding:9px 2px;border-bottom:1px dashed #e6ebf3;font-size:13px}
+  .witem input{width:24px;height:24px;margin:1px 0 0;flex:0 0 auto}
+  .witem.done span{color:var(--grey);text-decoration:line-through}
+  .wtools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+  .ovtbl td.cell{cursor:pointer;text-align:center;font-weight:700}
+  .lnk{background:none;border:none;color:var(--blue);font-weight:700;cursor:pointer;padding:0;font-size:13px;text-decoration:underline}
+  #ivStage{background:var(--blue);color:#fff;border-radius:14px;padding:18px;text-align:center}
+  #ivBig{font-size:60px;font-weight:800;line-height:1;margin:4px 0}
+  #ivPhase{font-size:20px;font-weight:800;letter-spacing:1px}
+  #ivStage.work{background:#1E7D34}#ivStage.rest{background:#B88600}#ivStage.prep{background:var(--blue)}
+  /* training-day timer */
+  #tivStage{background:var(--blue);color:#fff;border-radius:14px;padding:14px;text-align:center}
+  #tivBig{font-size:48px;font-weight:800;line-height:1;margin:2px 0}
+  #tivPhase{font-size:18px;font-weight:800;letter-spacing:1px}
+  #tivStage.work{background:#1E7D34}#tivStage.rest{background:#B88600}#tivStage.prep{background:var(--blue)}
+  /* dark mode */
+  body.dark{--bg:#0e1521;--card:#18222f;--lt:#1d2c44;--lt2:#15202e;--grey:#9aa6b6;color:#e7edf6}
+  body.dark .card{border-color:#26344a}
+  body.dark input,body.dark select,body.dark textarea{background:#1d2a3a;color:#e7edf6;border-color:#34465f}
+  body.dark th{background:#0c182b}
+  body.dark td{border-color:#26344a}
+  body.dark tr:nth-child(even) td{background:#141f2d}
+  body.dark .chip{background:#1d2a3a;border-color:#34465f;color:#cdd9ea}
+  body.dark .chip.on{background:var(--blue);color:#fff}
+  body.dark .stat,body.dark .witem{border-color:#26344a}
+  body.dark .muted{color:#9aa6b6}
+  body.dark .note{background:#152233}
+  body.dark .btn.ghost{background:#22324a;color:#cdd9ea}
+  body.dark #trainClock{color:#cfe0f5 !important}
+  body.dark .progress{background:#26344a}
+  /* per-trainee circuit clocks */
+  .ivmini{margin-top:10px;border-top:1px dashed #e6ebf3;padding-top:9px}
+  .ivinputs{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .ivinputs span{display:flex;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--grey)}
+  .ivinputs input{width:54px;padding:6px;text-align:center}
+  .ivinputs .btn.small{width:auto;padding:7px 11px;margin:0}
+  .ministage{margin-top:8px;border-radius:9px;padding:9px;text-align:center;color:#fff}
+  .ministage b{font-size:13px;letter-spacing:.5px}
+  .ministage .big{font-size:26px;font-weight:800;margin:0 8px;vertical-align:middle}
+  .ministage.work{background:#1E7D34}.ministage.rest{background:#B88600}.ministage.prep{background:var(--blue)}
+  body.dark .ivmini{border-color:#26344a}
+</style>
+</head>
+<body>
+<header>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="flex:1">
+      <h1>Air Force FIP Companion</h1>
+      <p>Workout checklists, progress log &amp; mock-test timers &middot; data on this device</p>
+    </div>
+    <button id="themeBtn" onclick="toggleTheme()" title="Toggle dark mode" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:9px;padding:9px 13px;font-size:17px;cursor:pointer">&#9790;</button>
+  </div>
+</header>
+<nav>
+  <button data-tab="dash" class="active">Dashboard</button>
+  <button data-tab="train">Train</button>
+  <button data-tab="workouts">Workouts</button>
+  <button data-tab="log">Log Entry</button>
+  <button data-tab="hist">History</button>
+  <button data-tab="hamr">Timers</button>
+  <button data-tab="data">Data</button>
+</nav>
+<main>
+  <section id="dash" class="tab active"></section>
+
+  <section id="train" class="tab">
+    <div class="card">
+      <h2>Training Day &mdash; everyone on one page</h2>
+      <div class="row3">
+        <div><label>Program</label><select id="t_prog"></select></div>
+        <div><label>Week</label><select id="t_week"></select></div>
+        <div><label>Session</label><select id="t_sess"></select></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="muted" style="font-size:11px">TIME OF DAY</div>
+      <div id="trainClock" style="font-size:34px;font-weight:800;color:var(--navy)">--:--:--</div>
+      <p class="muted" style="margin:6px 0 0">Each Airman below has their own circuit clock, pre-set to that day’s work / rest / rounds — start them independently when the timings differ.</p>
+    </div>
+
+    <div id="train_body"></div>
+  </section>
+
+  <section id="workouts" class="tab">
+    <div class="card">
+      <h2>Workouts &mdash; check off as you go</h2>
+      <div class="row3">
+        <div><label>Program</label><select id="w_prog"></select></div>
+        <div><label>Week</label><select id="w_week"></select></div>
+        <div><label>Airman</label><select id="w_ath"></select></div>
+      </div>
+    </div>
+    <div id="w_body"></div>
+  </section>
+
+  <section id="log" class="tab">
+    <div class="card">
+      <h2>Log a training / measurement entry</h2>
+      <div class="row">
+        <div><label>Airman</label><select id="f_athlete"></select></div>
+        <div><label>Date</label><input type="date" id="f_date"></div>
+      </div>
+      <div class="row">
+        <div><label>Body weight (lb)</label><input type="number" id="f_weight" inputmode="decimal" placeholder="e.g. 232"></div>
+        <div><label>Waist (in)</label><input type="number" id="f_waist" inputmode="decimal" placeholder="e.g. 37"></div>
+      </div>
+      <h3 style="margin-top:14px">Test components (log what you measured)</h3>
+      <div class="row">
+        <div><label>Cardio type</label><select id="f_cardioType">
+          <option value="">—</option><option>20m HAMR (shuttles)</option><option>2-mile run (mm:ss)</option><option>Walk-run note</option></select></div>
+        <div><label>Cardio result</label><input id="f_cardio" placeholder="e.g. 42 or 19:30"></div>
+      </div>
+      <div class="row">
+        <div><label>Upper type</label><select id="f_upperType">
+          <option value="">—</option><option>Push-ups</option><option>Hand-release push-ups</option></select></div>
+        <div><label>Upper reps</label><input type="number" id="f_upper" inputmode="numeric" placeholder="e.g. 45"></div>
+      </div>
+      <div class="row">
+        <div><label>Core type</label><select id="f_coreType">
+          <option value="">—</option><option>Forearm plank (mm:ss)</option><option>CLRC (reps)</option><option>Sit-ups (reps)</option></select></div>
+        <div><label>Core result</label><input id="f_core" placeholder="e.g. 3:05 or 24"></div>
+      </div>
+      <div class="row3">
+        <div><label>Avg steps/day</label><input type="number" id="f_steps" inputmode="numeric" placeholder="8000"></div>
+        <div><label>Sleep (hrs)</label><input type="number" id="f_sleep" inputmode="decimal" placeholder="7"></div>
+        <div><label>RPE (1–10)</label><input type="number" id="f_rpe" inputmode="numeric" min="1" max="10" placeholder="8"></div>
+      </div>
+      <label>Sessions completed</label>
+      <div class="chips" id="f_sessions">
+        <span class="chip" data-s="A">Session A</span>
+        <span class="chip" data-s="B">Session B</span>
+        <span class="chip" data-s="C">Session C</span>
+      </div>
+      <label>Back-pain check (0 none – 3 severe) <span class="muted">— key for Spruill</span></label>
+      <select id="f_pain"><option value="">—</option><option>0 — none</option><option>1 — mild</option><option>2 — moderate</option><option>3 — severe</option></select>
+      <label>Notes</label><textarea id="f_notes" placeholder="How it went, any flags…"></textarea>
+      <button class="btn" id="saveBtn">Save entry</button>
+    </div>
+  </section>
+
+  <section id="hist" class="tab">
+    <div class="card">
+      <h2>History</h2>
+      <label>Airman</label><select id="h_athlete"></select>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn small alt" id="csvBtn">Export CSV</button>
+      </div>
+      <div class="scroll" id="histTable"></div>
+    </div>
+  </section>
+
+  <section id="hamr" class="tab">
+    <div class="card">
+      <h2>Interval / Circuit Timer</h2>
+      <p class="muted">For the work/rest circuits (e.g., 40s work / 20s rest). Beeps high for WORK, low for REST, with a 3-2-1 countdown.</p>
+      <div class="row3">
+        <div><label>Work (s)</label><input type="number" id="iv_work" value="40" inputmode="numeric"></div>
+        <div><label>Rest (s)</label><input type="number" id="iv_rest" value="20" inputmode="numeric"></div>
+        <div><label>Rounds</label><input type="number" id="iv_rounds" value="5" inputmode="numeric"></div>
+      </div>
+      <div id="ivStage" class="prep" style="margin-top:12px">
+        <div id="ivPhase">READY</div>
+        <div id="ivBig">--</div>
+        <div id="ivRound" style="font-size:13px;opacity:.85">round 0 / 0</div>
+      </div>
+      <div class="controls">
+        <button class="btn" id="ivStart">&#9654; Start</button>
+        <button class="btn danger" id="ivStop">&#9632; Stop / Reset</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>HAMR Mock-Test Timer</h2>
+      <div id="hamrStage">
+        <div id="hamrSub">Press START — 5-second countdown, then run on the beep</div>
+        <div id="hamrBig">—</div>
+        <div id="hamrSub2" style="font-size:13px;color:#BDD0EE">Level / Shuttle</div>
+        <div id="runCue"></div>
+        <div class="hamrgrid">
+          <div class="hbox"><div class="k">TOTAL SHUTTLES</div><div class="v" id="hTotal">0</div></div>
+          <div class="hbox"><div class="k">LEVEL</div><div class="v" id="hLevel">–</div></div>
+          <div class="hbox"><div class="k">SPEED km/h</div><div class="v" id="hSpeed">–</div></div>
+        </div>
+        <div id="hClock" style="margin-top:10px;font-size:13px;color:#BDD0EE">00:00 elapsed</div>
+      </div>
+      <div class="controls">
+        <button class="btn" id="startBtn">▶ Start</button>
+        <button class="btn danger" id="stopBtn">■ Stop / Reset</button>
+      </div>
+      <label style="margin-top:14px">Beep volume</label>
+      <input type="range" id="vol" min="0" max="1" step="0.05" value="0.6">
+      <div class="note"><b>How to score:</b> a missed line that the Airman doesn't recover within the next beep, three beeps in a row, ends their test. Tap <b>Stop</b> at their last good shuttle — the <b>TOTAL SHUTTLES</b> number is their HAMR score to enter in the log. Cadence = EuroFit 20m protocol (L1 = 8.0 km/h, +0.5/level). <b>For official scoring use the unit's certified audio.</b></div>
+      <details><summary>Level &amp; shuttle table</summary><div class="scroll" id="lvlTable"></div></details>
+    </div>
+  </section>
+
+  <section id="data" class="tab">
+    <div class="card">
+      <h2>Data &amp; backup</h2>
+      <p class="muted">All entries are stored only in this browser on this device. Export regularly to back up or move to another device.</p>
+      <button class="btn alt" id="exportBtn">Export all data (JSON)</button>
+      <label style="margin-top:14px">Import data (paste exported JSON, then Import)</label>
+      <textarea id="importBox" placeholder="Paste JSON here"></textarea>
+      <button class="btn ghost" id="importBtn">Import</button>
+      <button class="btn danger" id="resetBtn">Erase all logged data</button>
+      <div class="note">Tip: on a phone, use your browser's “Add to Home Screen” to keep this app one tap away on the field.</div>
+    </div>
+  </section>
+</main>
+<div class="saveflash" id="flash">Saved ✓</div>
+
+<script>
+/* ---------------- Athlete config (baselines + targets from intake) ---------------- */
+const ATH = {
+  Jackson:  {color:"#2E5496", heightIn:73, age:35, grp:"35–39",
+    base:{weight:232, waist:37, cardio:"Run 21:16", upper:"43 push-ups", core:"Plank 3:05"},
+    target:{waist:35.5, weightNote:"hold lean", cardio:"HAMR 55+ / run <19:00", upper:"52+ push-ups", core:"Plank 3:25"},
+    cardioPick:"20m HAMR", minNote:"HAMR pass ≥32 shuttles"},
+  Alvarado: {color:"#1E7D34", heightIn:66, age:29, grp:"25–29",
+    base:{weight:193, waist:39, cardio:"Run 22:40", upper:"50 HR push-ups", core:"CLRC 53"},
+    target:{waist:35.75, weightNote:"down", cardio:"HAMR 42+ → 55", upper:"hold 50 (max)", core:"CLRC 56+"},
+    cardioPick:"20m HAMR", minNote:"HAMR pass ≥42 shuttles"},
+  Farber:   {color:"#B88600", heightIn:68.5, age:40, grp:"40–44",
+    base:{weight:207, waist:39, cardio:"HAMR 26", upper:"45 push-ups", core:"Sit-ups 39 (painful)"},
+    target:{waist:37, weightNote:"down", cardio:"2-mile <22:04 → <20:00", upper:"49+ push-ups", core:"CLRC ~50"},
+    cardioPick:"2-mile run", minNote:"2-mile pass <22:04"},
+  Spruill:  {color:"#C0392B", heightIn:73, age:34, grp:"30–34",
+    base:{weight:277, waist:45, cardio:"HAMR 20", upper:"29 HR push-ups", core:"Plank 1:19"},
+    target:{waist:41.5, weightNote:"~258 lb", cardio:"HAMR into pass range", upper:"40+ push-ups", core:"CLRC ~40"},
+    cardioPick:"20m HAMR", minNote:"HAMR pass ≥38 shuttles · WATCH BACK"}
+};
+const NAMES = Object.keys(ATH);
+
+/* ---------------- Storage ---------------- */
+const KEY="fipCompanionData";
+function load(){ try{return JSON.parse(localStorage.getItem(KEY))||{logs:[]}}catch(e){return {logs:[]}} }
+function save(d){ localStorage.setItem(KEY, JSON.stringify(d)); }
+let DB = load(); DB.done = DB.done || {};
+const PROGRAMS = {"bw": {"label": "Bodyweight (4-week)", "weeks": 4, "data": {"Jackson": {"1": [{"name": "SESSION A — ENGINE (track + legs)", "min": 40, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "A1 — Run intervals — 400 m reps 5   |   walk 200 m between reps", "A2 — Lower circuit — Rounds 3  ·  Air squats 20  ·  Rev lunge/leg 10  ·  Glute bridge 15  ·  Calf raise 20   |   rest 75 s between rounds", "A3 — Core finisher — Rounds 3  ·  Front plank 40 s  ·  Dead bug/side 10  ·  CLRC 15   |   rest 20 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION B — STRENGTH CIRCUIT", "min": 39, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "B1 — Push & pull — Rounds 4  ·  Push-ups 15  ·  Y-T-W (each) 8  ·  Pike push-ups 8  ·  Mtn climbers 20   |   rest 80 s between rounds", "B2 — Lower circuit — Rounds 3  ·  Walking lunges 20  ·  Air squats 20  ·  SL glute bridge/leg 10  ·  Calf raise 20   |   rest 75 s between rounds", "B3 — Core circuit — Rounds 4  ·  Front plank 30 s  ·  Side plank/each 20 s  ·  Bird-dog/side 10   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION C — CONDITIONING MIXER (turf · ankle-friendly)", "min": 39, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "C1 — Shuttle conditioning — Rounds 4  ·  Shuttles 6  ·  Air squats 15  ·  Push-ups 10  ·  Mtn climbers 20   |   rest 90 s between rounds", "C2 — Total-body + core — Rounds 3  ·  Bear crawl 15 m  ·  Walking lunges 20  ·  Front plank 30 s  ·  CLRC 15  ·  Lateral shuffle 20 m   |   rest 60 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}], "2": [{"name": "SESSION A — ENGINE (track + legs)", "min": 40, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "A1 — Run intervals — 400 m reps 6   |   walk 200 m between reps", "A2 — Lower circuit — Rounds 3  ·  Air squats 22  ·  Rev lunge/leg 12  ·  Glute bridge 18  ·  Calf raise 22   |   rest 75 s between rounds", "A3 — Core finisher — Rounds 3  ·  Front plank 45 s  ·  Dead bug/side 12  ·  CLRC 18   |   rest 20 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION B — STRENGTH CIRCUIT", "min": 39, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "B1 — Push & pull — Rounds 4  ·  Push-ups 18  ·  Y-T-W (each) 10  ·  Pike push-ups 10  ·  Mtn climbers 30   |   rest 80 s between rounds", "B2 — Lower circuit — Rounds 3  ·  Walking lunges 24  ·  Air squats 24  ·  SL glute bridge/leg 12  ·  Calf raise 22   |   rest 75 s between rounds", "B3 — Core circuit — Rounds 4  ·  Front plank 40 s  ·  Side plank/each 25 s  ·  Bird-dog/side 12   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION C — CONDITIONING MIXER (turf · ankle-friendly)", "min": 39, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "C1 — Shuttle conditioning — Rounds 5  ·  Shuttles 6  ·  Air squats 15  ·  Push-ups 10  ·  Mtn climbers 20   |   rest 90 s between rounds", "C2 — Total-body + core — Rounds 4  ·  Bear crawl 15 m  ·  Walking lunges 24  ·  Front plank 40 s  ·  CLRC 18  ·  Lateral shuffle 20 m   |   rest 60 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}], "3": [{"name": "SESSION A — ENGINE (track + legs)", "min": 40, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "A1 — Run intervals — 400 m reps 6   |   walk 200 m between reps", "A2 — Lower circuit — Rounds 4  ·  Air squats 22  ·  Rev lunge/leg 12  ·  Glute bridge 18  ·  Calf raise 25   |   rest 75 s between rounds", "A3 — Core finisher — Rounds 3  ·  Front plank 50 s  ·  Dead bug/side 12  ·  CLRC 18   |   rest 20 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION B — STRENGTH CIRCUIT", "min": 39, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "B1 — Push & pull — Rounds 5  ·  Push-ups 20  ·  Y-T-W (each) 10  ·  Pike push-ups 12  ·  Mtn climbers 30   |   rest 80 s between rounds", "B2 — Lower circuit — Rounds 4  ·  Walking lunges 24  ·  Air squats 24  ·  SL glute bridge/leg 12  ·  Calf raise 25   |   rest 75 s between rounds", "B3 — Core circuit — Rounds 4  ·  Front plank 45 s  ·  Side plank/each 30 s  ·  Bird-dog/side 12   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION C — CONDITIONING MIXER (turf · ankle-friendly)", "min": 39, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "C1 — Shuttle conditioning — Rounds 5  ·  Shuttles 8  ·  Air squats 15  ·  Push-ups 12  ·  Mtn climbers 25   |   rest 90 s between rounds", "C2 — Total-body + core — Rounds 4  ·  Bear crawl 20 m  ·  Walking lunges 24  ·  Front plank 45 s  ·  CLRC 18  ·  Lateral shuffle 20 m   |   rest 60 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}], "4": [{"name": "SESSION A — ENGINE (track + legs)", "min": 40, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "A1 — Run intervals — 400 m reps 7 (or 5×600 m)   |   walk 200 m between reps", "A2 — Lower circuit — Rounds 4  ·  Air squats 25  ·  Rev lunge/leg 15  ·  Glute bridge 20  ·  Calf raise 25   |   rest 75 s between rounds", "A3 — Core finisher — Rounds 3  ·  Front plank 60 s  ·  Dead bug/side 14  ·  CLRC 20   |   rest 20 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION B — STRENGTH CIRCUIT", "min": 39, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "B1 — Push & pull — Rounds 5  ·  Push-ups 22  ·  Y-T-W (each) 12  ·  Pike push-ups 12  ·  Mtn climbers 40   |   rest 80 s between rounds", "B2 — Lower circuit — Rounds 4  ·  Walking lunges 28  ·  Air squats 26  ·  SL glute bridge/leg 15  ·  Calf raise 25   |   rest 75 s between rounds", "B3 — Core circuit — Rounds 4  ·  Front plank 60 s  ·  Side plank/each 35 s  ·  Bird-dog/side 14   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION C — CONDITIONING MIXER (turf · ankle-friendly)", "min": 39, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "C1 — Shuttle conditioning — Rounds 6  ·  Shuttles 8  ·  Air squats 18  ·  Push-ups 12  ·  Mtn climbers 25   |   rest 90 s between rounds", "C2 — Total-body + core — Rounds 5  ·  Bear crawl 20 m  ·  Walking lunges 28  ·  Front plank 45 s  ·  CLRC 20  ·  Lateral shuffle 20 m   |   rest 60 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}]}, "Alvarado": {"1": [{"name": "SESSION A — ENGINE (turf · shin-friendly)", "min": 38, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "A1 — Shuttle intervals — Rounds 10  ·  Work 45 s  ·  Rest 45 s", "A2 — Lower + shin armor — Rounds 3  ·  Air squats 20  ·  Rev lunge/leg 10  ·  SL bridge/leg 10  ·  Calf 20  ·  Tibialis 15   |   rest 75 s between rounds", "A3 — Core finisher — Rounds 3  ·  CLRC 18  ·  Hollow hold 20 s  ·  Front plank 40 s   |   rest 20 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION B — STRENGTH CIRCUIT", "min": 39, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "B1 — Push & pull (keep the max) — Rounds 4  ·  HR push-ups 15  ·  Y-T-W (each) 10  ·  Pike push-ups 8  ·  Mtn climbers 20   |   rest 80 s between rounds", "B2 — Lower circuit — Rounds 3  ·  Walking lunges 20  ·  Air squats 20  ·  SL glute bridge/leg 10  ·  Calf raise 20   |   rest 75 s between rounds", "B3 — Core circuit — Rounds 4  ·  CLRC 18  ·  Side plank/each 20 s  ·  Bird-dog/side 10   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION C — CALORIE MIXER (turf · big movement)", "min": 38, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "C1 — Calorie circuit — Rounds 4  ·  Bear crawl 15 m  ·  Squat thrusts 12  ·  Walking lunges 20  ·  Lat shuffle 20 m  ·  Mtn climbers 20   |   rest 75 s between rounds", "C2 — Finisher + core — Rounds 3  ·  High knees 30 s  ·  Walking lunges 20  ·  CLRC 18  ·  Front plank 30 s   |   rest 60 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}], "2": [{"name": "SESSION A — ENGINE (turf · shin-friendly)", "min": 38, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "A1 — Shuttle intervals — Rounds 12  ·  Work 45 s  ·  Rest 45 s", "A2 — Lower + shin armor — Rounds 3  ·  Air squats 24  ·  Rev lunge/leg 12  ·  SL bridge/leg 12  ·  Calf 20  ·  Tibialis 20   |   rest 75 s between rounds", "A3 — Core finisher — Rounds 3  ·  CLRC 20  ·  Hollow hold 25 s  ·  Front plank 45 s   |   rest 20 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION B — STRENGTH CIRCUIT", "min": 39, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "B1 — Push & pull (keep the max) — Rounds 4  ·  HR push-ups 18  ·  Y-T-W (each) 12  ·  Pike push-ups 10  ·  Mtn climbers 30   |   rest 80 s between rounds", "B2 — Lower circuit — Rounds 3  ·  Walking lunges 24  ·  Air squats 24  ·  SL glute bridge/leg 12  ·  Calf raise 22   |   rest 75 s between rounds", "B3 — Core circuit — Rounds 4  ·  CLRC 20  ·  Side plank/each 25 s  ·  Bird-dog/side 12   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION C — CALORIE MIXER (turf · big movement)", "min": 38, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "C1 — Calorie circuit — Rounds 4  ·  Bear crawl 15 m  ·  Squat thrusts 14  ·  Walking lunges 24  ·  Lat shuffle 20 m  ·  Mtn climbers 24   |   rest 75 s between rounds", "C2 — Finisher + core — Rounds 4  ·  High knees 30 s  ·  Walking lunges 24  ·  CLRC 20  ·  Front plank 40 s   |   rest 60 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}], "3": [{"name": "SESSION A — ENGINE (turf · shin-friendly)", "min": 38, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "A1 — Shuttle intervals — Rounds 12  ·  Work 50 s  ·  Rest 40 s", "A2 — Lower + shin armor — Rounds 4  ·  Air squats 24  ·  Rev lunge/leg 12  ·  SL bridge/leg 12  ·  Calf 25  ·  Tibialis 20   |   rest 75 s between rounds", "A3 — Core finisher — Rounds 3  ·  CLRC 22  ·  Hollow hold 30 s  ·  Front plank 50 s   |   rest 20 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION B — STRENGTH CIRCUIT", "min": 39, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "B1 — Push & pull (keep the max) — Rounds 5  ·  HR push-ups 18  ·  Y-T-W (each) 12  ·  Pike push-ups 12  ·  Mtn climbers 30   |   rest 80 s between rounds", "B2 — Lower circuit — Rounds 4  ·  Walking lunges 24  ·  Air squats 24  ·  SL glute bridge/leg 12  ·  Calf raise 25   |   rest 75 s between rounds", "B3 — Core circuit — Rounds 4  ·  CLRC 22  ·  Side plank/each 30 s  ·  Bird-dog/side 12   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION C — CALORIE MIXER (turf · big movement)", "min": 38, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "C1 — Calorie circuit — Rounds 5  ·  Bear crawl 20 m  ·  Squat thrusts 16  ·  Walking lunges 24  ·  Lat shuffle 20 m  ·  Mtn climbers 30   |   rest 75 s between rounds", "C2 — Finisher + core — Rounds 4  ·  High knees 40 s  ·  Walking lunges 24  ·  CLRC 20  ·  Front plank 45 s   |   rest 60 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}], "4": [{"name": "SESSION A — ENGINE (turf · shin-friendly)", "min": 38, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "A1 — Shuttle intervals — Rounds 14  ·  Work 50 s  ·  Rest 40 s", "A2 — Lower + shin armor — Rounds 4  ·  Air squats 28  ·  Rev lunge/leg 15  ·  SL bridge/leg 15  ·  Calf 25  ·  Tibialis 20   |   rest 75 s between rounds", "A3 — Core finisher — Rounds 3  ·  CLRC 24  ·  Hollow hold 35 s  ·  Front plank 60 s   |   rest 20 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION B — STRENGTH CIRCUIT", "min": 39, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "B1 — Push & pull (keep the max) — Rounds 5  ·  HR push-ups 20  ·  Y-T-W (each) 12  ·  Pike push-ups 12  ·  Mtn climbers 40   |   rest 80 s between rounds", "B2 — Lower circuit — Rounds 4  ·  Walking lunges 28  ·  Air squats 26  ·  SL glute bridge/leg 15  ·  Calf raise 25   |   rest 75 s between rounds", "B3 — Core circuit — Rounds 4  ·  CLRC 24  ·  Side plank/each 35 s  ·  Bird-dog/side 14   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION C — CALORIE MIXER (turf · big movement)", "min": 38, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "C1 — Calorie circuit — Rounds 5  ·  Bear crawl 20 m  ·  Squat thrusts 18  ·  Walking lunges 28  ·  Lat shuffle 20 m  ·  Mtn climbers 30   |   rest 75 s between rounds", "C2 — Finisher + core — Rounds 4  ·  High knees 40 s  ·  Walking lunges 28  ·  CLRC 22  ·  Front plank 45 s   |   rest 60 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}]}, "Farber": {"1": [{"name": "SESSION A — ENGINE (track + legs)", "min": 40, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "A1 — Run intervals — Run reps 5 × 400 m", "A2 — Lower circuit — Rounds 3  ·  Air squats 20  ·  Rev lunge/leg 10  ·  Glute bridge 15  ·  Calf raise 20   |   rest 75 s between rounds", "A3 — Back-safe core — Rounds 3  ·  Dead bug/side 10  ·  Bird-dog/side 10  ·  CLRC 15   |   rest 20 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION B — STRENGTH CIRCUIT (back-safe core)", "min": 40, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "B1 — Push & pull — Rounds 4  ·  Push-ups 15  ·  Y-T-W (each) 8  ·  Pike push-ups 8  ·  Mtn climbers 20   |   rest 80 s between rounds", "B2 — Lower circuit — Rounds 3  ·  Walking lunges 20  ·  Air squats 20  ·  SL glute bridge/leg 10  ·  Calf raise 20   |   rest 75 s between rounds", "B3 — Back-safe core — Rounds 4  ·  Front plank 30 s  ·  Side plank/each 20 s  ·  Dead bug/side 10   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION C — TEMPO + CORE (back-safe)", "min": 36, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "C1 — Tempo run — Tempo run 12 min  ·  Strides 4 × 100 m", "C2 — Total-body + back-safe core — Rounds 3  ·  Bear crawl 15 m  ·  Walking lunges 20  ·  Front plank 30 s  ·  CLRC 15  ·  Lateral shuffle 20 m   |   rest 60 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}], "2": [{"name": "SESSION A — ENGINE (track + legs)", "min": 40, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "A1 — Run intervals — Run reps 6 × 400 m", "A2 — Lower circuit — Rounds 3  ·  Air squats 22  ·  Rev lunge/leg 12  ·  Glute bridge 18  ·  Calf raise 22   |   rest 75 s between rounds", "A3 — Back-safe core — Rounds 3  ·  Dead bug/side 12  ·  Bird-dog/side 12  ·  CLRC 18   |   rest 20 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION B — STRENGTH CIRCUIT (back-safe core)", "min": 40, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "B1 — Push & pull — Rounds 4  ·  Push-ups 18  ·  Y-T-W (each) 10  ·  Pike push-ups 10  ·  Mtn climbers 30   |   rest 80 s between rounds", "B2 — Lower circuit — Rounds 3  ·  Walking lunges 24  ·  Air squats 24  ·  SL glute bridge/leg 12  ·  Calf raise 22   |   rest 75 s between rounds", "B3 — Back-safe core — Rounds 4  ·  Front plank 40 s  ·  Side plank/each 25 s  ·  Dead bug/side 12   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION C — TEMPO + CORE (back-safe)", "min": 36, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "C1 — Tempo run — Tempo run 15 min  ·  Strides 5 × 100 m", "C2 — Total-body + back-safe core — Rounds 4  ·  Bear crawl 15 m  ·  Walking lunges 24  ·  Front plank 40 s  ·  CLRC 18  ·  Lateral shuffle 20 m   |   rest 60 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}], "3": [{"name": "SESSION A — ENGINE (track + legs)", "min": 40, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "A1 — Run intervals — Run reps 4 × 800 m", "A2 — Lower circuit — Rounds 4  ·  Air squats 22  ·  Rev lunge/leg 12  ·  Glute bridge 18  ·  Calf raise 25   |   rest 75 s between rounds", "A3 — Back-safe core — Rounds 3  ·  Dead bug/side 12  ·  Bird-dog/side 12  ·  CLRC 18   |   rest 20 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION B — STRENGTH CIRCUIT (back-safe core)", "min": 40, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "B1 — Push & pull — Rounds 5  ·  Push-ups 20  ·  Y-T-W (each) 10  ·  Pike push-ups 12  ·  Mtn climbers 30   |   rest 80 s between rounds", "B2 — Lower circuit — Rounds 4  ·  Walking lunges 24  ·  Air squats 24  ·  SL glute bridge/leg 12  ·  Calf raise 25   |   rest 75 s between rounds", "B3 — Back-safe core — Rounds 4  ·  Front plank 45 s  ·  Side plank/each 30 s  ·  Dead bug/side 12   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION C — TEMPO + CORE (back-safe)", "min": 36, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "C1 — Tempo run — Tempo run 18 min  ·  Strides 6 × 100 m", "C2 — Total-body + back-safe core — Rounds 4  ·  Bear crawl 20 m  ·  Walking lunges 24  ·  Front plank 45 s  ·  CLRC 18  ·  Lateral shuffle 20 m   |   rest 60 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}], "4": [{"name": "SESSION A — ENGINE (track + legs)", "min": 40, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "A1 — Run intervals — Run reps 5 × 800 m", "A2 — Lower circuit — Rounds 4  ·  Air squats 25  ·  Rev lunge/leg 15  ·  Glute bridge 20  ·  Calf raise 25   |   rest 75 s between rounds", "A3 — Back-safe core — Rounds 3  ·  Dead bug/side 14  ·  Bird-dog/side 14  ·  CLRC 20   |   rest 20 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION B — STRENGTH CIRCUIT (back-safe core)", "min": 40, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "B1 — Push & pull — Rounds 5  ·  Push-ups 22  ·  Y-T-W (each) 12  ·  Pike push-ups 12  ·  Mtn climbers 40   |   rest 80 s between rounds", "B2 — Lower circuit — Rounds 4  ·  Walking lunges 28  ·  Air squats 26  ·  SL glute bridge/leg 15  ·  Calf raise 25   |   rest 75 s between rounds", "B3 — Back-safe core — Rounds 4  ·  Front plank 60 s  ·  Side plank/each 35 s  ·  Dead bug/side 14   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION C — TEMPO + CORE (back-safe)", "min": 36, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "C1 — Tempo run — Tempo run 20 min  ·  Strides 6 × 150 m", "C2 — Total-body + back-safe core — Rounds 5  ·  Bear crawl 20 m  ·  Walking lunges 28  ·  Front plank 45 s  ·  CLRC 20  ·  Lateral shuffle 20 m   |   rest 60 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}]}, "Spruill": {"1": [{"name": "SESSION A — ENGINE (walk-run · low-impact)", "min": 35, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "A1 — Walk-run intervals — Rounds 8  ·  Brisk walk 90 s  ·  Jog 15 s", "A2 — Lower circuit — Rounds 3  ·  Sit-to-stand 12  ·  Rev lunge/leg 8  ·  Glute bridge 15  ·  Calf raise 15   |   rest 75–90 s between rounds", "A3 — Back-safe core — Rounds 3  ·  Plank (knees OK) 20 s  ·  Dead bug/side 8  ·  CLRC 10   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION B — STRENGTH CIRCUIT (build the push · back-safe core)", "min": 36, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "B1 — Push & pull — Rounds 3  ·  Knee push-ups 8  ·  Y-T-W (each) 8  ·  Pike (knees) 6  ·  Fast march 30 s   |   rest 90 s between rounds", "B2 — Lower circuit — Rounds 3  ·  Walking lunges 16  ·  Sit-to-stand 12  ·  Glute bridge 15  ·  Calf raise 15   |   rest 80 s between rounds", "B3 — Back-safe core — Rounds 3  ·  Plank 20 s  ·  Side plank/each 15 s  ·  Dead bug/side 8   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION C — LOW-IMPACT CALORIE MIXER (turf)", "min": 36, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "C1 — Low-impact circuit — Rounds 3  ·  Walk shuttle 40 s  ·  Walking lunges 12  ·  Fast march 30 s  ·  Glute bridge 15  ·  Bear crawl 8 m   |   rest 75 s between rounds", "C2 — Brisk walk + core — Brisk walk 8 min  ·  Core rounds 3  ·  CLRC 10  ·  Dead bug/side 8  ·  Plank 20 s   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}], "2": [{"name": "SESSION A — ENGINE (walk-run · low-impact)", "min": 35, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "A1 — Walk-run intervals — Rounds 8  ·  Brisk walk 75 s  ·  Jog 30 s", "A2 — Lower circuit — Rounds 3  ·  Sit-to-stand 15  ·  Rev lunge/leg 10  ·  Glute bridge 18  ·  Calf raise 18   |   rest 75–90 s between rounds", "A3 — Back-safe core — Rounds 3  ·  Plank (knees OK) 25 s  ·  Dead bug/side 10  ·  CLRC 12   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION B — STRENGTH CIRCUIT (build the push · back-safe core)", "min": 36, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "B1 — Push & pull — Rounds 3  ·  Knee push-ups 10  ·  Y-T-W (each) 10  ·  Pike (knees) 6  ·  Fast march 30 s   |   rest 90 s between rounds", "B2 — Lower circuit — Rounds 3  ·  Walking lunges 20  ·  Sit-to-stand 15  ·  Glute bridge 18  ·  Calf raise 18   |   rest 80 s between rounds", "B3 — Back-safe core — Rounds 3  ·  Plank 25 s  ·  Side plank/each 20 s  ·  Dead bug/side 10   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION C — LOW-IMPACT CALORIE MIXER (turf)", "min": 36, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "C1 — Low-impact circuit — Rounds 3  ·  Walk shuttle 45 s  ·  Walking lunges 16  ·  Fast march 40 s  ·  Glute bridge 18  ·  Bear crawl 10 m   |   rest 75 s between rounds", "C2 — Brisk walk + core — Brisk walk 10 min  ·  Core rounds 3  ·  CLRC 12  ·  Dead bug/side 10  ·  Plank 25 s   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}], "3": [{"name": "SESSION A — ENGINE (walk-run · low-impact)", "min": 35, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "A1 — Walk-run intervals — Rounds 10  ·  Brisk walk 60 s  ·  Jog 30 s", "A2 — Lower circuit — Rounds 3  ·  Sit-to-stand 15  ·  Rev lunge/leg 10  ·  Glute bridge 20  ·  Calf raise 20   |   rest 75–90 s between rounds", "A3 — Back-safe core — Rounds 3  ·  Plank (knees OK) 30 s  ·  Dead bug/side 10  ·  CLRC 12   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION B — STRENGTH CIRCUIT (build the push · back-safe core)", "min": 36, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "B1 — Push & pull — Rounds 4  ·  Knee push-ups 12  ·  Y-T-W (each) 10  ·  Pike (knees) 8  ·  Fast march 40 s   |   rest 90 s between rounds", "B2 — Lower circuit — Rounds 4  ·  Walking lunges 20  ·  Sit-to-stand 15  ·  Glute bridge 20  ·  Calf raise 20   |   rest 80 s between rounds", "B3 — Back-safe core — Rounds 3  ·  Plank 30 s  ·  Side plank/each 20 s  ·  Dead bug/side 10   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION C — LOW-IMPACT CALORIE MIXER (turf)", "min": 36, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "C1 — Low-impact circuit — Rounds 4  ·  Walk shuttle 45 s  ·  Walking lunges 16  ·  Fast march 40 s  ·  Glute bridge 18  ·  Bear crawl 10 m   |   rest 75 s between rounds", "C2 — Brisk walk + core — Brisk walk 10 min  ·  Core rounds 3  ·  CLRC 12  ·  Dead bug/side 10  ·  Plank 30 s   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}], "4": [{"name": "SESSION A — ENGINE (walk-run · low-impact)", "min": 35, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "A1 — Walk-run intervals — Rounds 10  ·  Brisk walk 60 s  ·  Jog 45 s", "A2 — Lower circuit — Rounds 4  ·  Sit-to-stand 18  ·  Rev lunge/leg 12  ·  Glute bridge 20  ·  Calf raise 20   |   rest 75–90 s between rounds", "A3 — Back-safe core — Rounds 3  ·  Plank (knees OK) 35 s  ·  Dead bug/side 12  ·  CLRC 14   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION B — STRENGTH CIRCUIT (build the push · back-safe core)", "min": 36, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "B1 — Push & pull — Rounds 4  ·  Knee push-ups 14 (some full)  ·  Y-T-W (each) 12  ·  Pike (knees) 8  ·  Fast march 40 s   |   rest 90 s between rounds", "B2 — Lower circuit — Rounds 4  ·  Walking lunges 24  ·  Sit-to-stand 18  ·  Glute bridge 20  ·  Calf raise 20   |   rest 80 s between rounds", "B3 — Back-safe core — Rounds 3  ·  Plank 35 s  ·  Side plank/each 25 s  ·  Dead bug/side 12   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}, {"name": "SESSION C — LOW-IMPACT CALORIE MIXER (turf)", "min": 36, "items": ["Warm-up — shared dynamic warm-up (~10 min)", "C1 — Low-impact circuit — Rounds 4  ·  Walk shuttle 50 s  ·  Walking lunges 20  ·  Fast march 45 s  ·  Glute bridge 20  ·  Bear crawl 12 m   |   rest 75 s between rounds", "C2 — Brisk walk + core — Brisk walk 12 min  ·  Core rounds 3  ·  CLRC 14  ·  Dead bug/side 12  ·  Plank 35 s   |   rest 30 s between rounds", "Cool-down — shared static cool-down (~10 min)"]}]}}}, "p12": {"label": "12-Week Program", "weeks": 12, "data": {"Jackson": {"1": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR 6×(30s shuttle / 90s walk), easy", "Plank 2×30s", "CLRC 2×12", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "PU 4×(max−2)", "KBS 3×12, KB row 3×10/s, GS 3×10, SU 3×8/leg", "CLRC 3×12", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "4×400m @ comfortable-hard / 200m walk", "HAMR turn drills 10 min", "Mobility: ankle/hip/low-back", "Cool-down + mobility (~8–10 min)"]}], "2": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR 7×(30s / 90s)", "Plank 2×40s", "CLRC 2×15", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "PU 4×(max−1)", "KBS 3×15, row 3×12/s, GS 3×12, SU 3×10/leg", "CLRC 3×15", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "5×400m / 200m walk", "Turn drills", "Mobility", "Cool-down + mobility (~8–10 min)"]}], "3": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR 8×(35s / 85s)", "Plank ladder 30/45/30", "CLRC 3×12", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "PU 5×(max−1)", "KBS 4×15, row 4×10/s, GS 4×12, SU 3×12/leg", "SP 2×30s/s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "6×400m / 200m walk", "Accel/decel shuttle drills", "Cool-down + mobility (~8–10 min)"]}], "4": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR 9×(35s / 85s)", "Plank 2×50s", "CLRC 3×15", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "PU 4×max + 1 tempo set (3s down)", "KBS 4×18, GS 4×12", "CLRC 3×18", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "4×600m / 200m walk", "Technique + mobility", "Cool-down + mobility (~8–10 min)"]}], "5": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR pacing 8×(45s on / 75s), push 1 level", "Plank 2×60s", "CLRC 3×15", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "PU 5×near-max + 1 AMRAP set", "KBS 5×15, row 4×12/s, GS 4×14", "SP 2×40s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "5×600m @ goal pace / 300 walk", "HAMR pacing to beep", "Cool-down + mobility (~8–10 min)"]}], "6": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "MOCK: max-effort HAMR — record shuttles/level", "Easy core only", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Deload: PU 3×submax, light KBS 3×12, mobility", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Mock week: 15–20 min easy shakeout + full mobility", "Cool-down + mobility (~8–10 min)"]}], "7": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR 9×(45s / 75s), +1 level vs Wk5", "Plank 3×45s", "CLRC 3×18", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "PU EMOM 8 min (fixed reps/min)", "KBS 5×18, row 5×10/s, GS 5×12", "CLRC 4×15", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "6×400m faster / full recovery", "Turn drills", "Cool-down + mobility (~8–10 min)"]}], "8": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR 10×(45s / 75s)", "Plank 2×75s", "SP 2×30s/s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "PU 5×max + cluster (max, 20s, AMRAP)", "KBS heavy 5×15, weighted SU 4×10/leg", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "3×800m @ goal / 400 walk", "Pacing practice", "Cool-down + mobility (~8–10 min)"]}], "9": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR sim: 1 run to ~85% effort + 6×(45s / 60s)", "Plank 2×80s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "PU density: max reps in 5 min", "KBS 5×20, GS 5×15, FC 4×40yd", "CLRC 4×18", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "2-mile tempo @ ~goal effort", "Shuttle-sim segments", "Cool-down + mobility (~8–10 min)"]}], "10": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR sim: 1 run near-max", "Plank 3×60s", "CLRC 4×15", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "PU 6×near-max", "FC 4×40yd heavy, KBS 5×18", "SP 3×40s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "6×400m @ faster-than-goal / 200 walk", "Turns", "Cool-down + mobility (~8–10 min)"]}], "11": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "MOCK PFRA — all 4 components scored", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Deload (mock wk): PU 3×submax, mobility", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Mock week: easy shakeout + mobility", "Cool-down + mobility (~8–10 min)"]}], "12": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "TAPER: 2×4-round easy shuttles, turns only", "Official test window", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "TAPER: PU 2×submax, crisp form", "Light movement", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "TAPER: 4×100m strides", "Rest, hydrate, sleep", "Cool-down + mobility (~8–10 min)"]}]}, "Alvarado": {"1": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Shin prep: calf+tib raises 2×15", "HAMR 6×(30s / 90s) turf", "CLRC 3×12, hollow 3×20s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HRPU 4×(max−2), crisp", "KBS 3×12, KB DL 3×10, GS 3×10", "Calf 3×20, tib 3×20", "CLRC 3×12", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Turf tempo 5×(1 min hard shuttle / 1 min walk)", "Eccentric calf 3×12", "Foam-roll calves", "Cool-down + mobility (~8–10 min)"]}], "2": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR 7×(30s / 90s)", "CLRC 3×15, hollow 3×25s", "Calf/tib 2×20", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HRPU 4×(max−1)", "KBS 3×15, KB DL 3×12, GS 3×12", "Calf/tib 3×20", "CLRC 3×15", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "6×(1 min / 1 min) turf", "Soleus raises 3×15", "Roll", "Cool-down + mobility (~8–10 min)"]}], "3": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR 8×(35s / 85s)", "CLRC 3×18", "Calf/tib 3×15", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HRPU 5×(max−1)", "KBS 4×15, GS 4×12", "Calf 4×20, tib 3×20", "SP 2×30s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "7×(1 min / 1 min)", "Eccentric calf 3×15", "Cool-down + mobility (~8–10 min)"]}], "4": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR 9×(35s / 85s)", "CLRC 4×15, SP 2×30s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HRPU 4×max + 1 tempo set", "KBS 4×18, KB DL 4×10", "CLRC 4×15", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "5×(90s / 90s) turf", "Shin care routine", "Cool-down + mobility (~8–10 min)"]}], "5": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR pacing 8×(45s / 75s), push level", "CLRC 4×18", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HRPU 5×near-max + 1 AMRAP", "KBS 5×15, GS 4×14", "Calf 4×22", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "6×(90s / 75s) @ goal effort", "HAMR pacing to beep", "Cool-down + mobility (~8–10 min)"]}], "6": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "MOCK: max HAMR — target 42+ to pass", "Light core", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Deload: HRPU 3×submax, mobility, calf/tib light", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Mock week: easy 15 min turf shakeout + shin care", "Cool-down + mobility (~8–10 min)"]}], "7": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR 9×(45s / 75s), +1 level", "CLRC 4×18, hollow 3×30s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HRPU EMOM 8 min", "KBS 5×18, KB DL 4×12, GS 5×12", "CLRC 4×18", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "7×(90s / 75s) faster", "Calf/tib full routine", "Cool-down + mobility (~8–10 min)"]}], "8": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR 10×(45s / 75s)", "CLRC 5×15, SP 2×40s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HRPU 5×max + cluster", "KBS heavy 5×15, FC 4×40yd", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "5×(2 min / 90s) turf tempo", "Pacing", "Cool-down + mobility (~8–10 min)"]}], "9": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR sim: 1 to ~85% + 6×(45s / 60s)", "CLRC 4×20 (→56)", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HRPU density: max reps in 5 min", "KBS 5×20, GS 5×15", "CLRC 4×20", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Long shuttle sim 8–10 min continuous moderate", "Shin care", "Cool-down + mobility (~8–10 min)"]}], "10": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR sim near-max", "CLRC 5×18", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HRPU 6×near-max", "FC 4×40yd, KBS 5×18", "SP 3×40s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "8×(90s / 60s) @ fast", "Turns", "Cool-down + mobility (~8–10 min)"]}], "11": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "MOCK PFRA — all components", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Deload (mock wk): HRPU 3×submax, mobility", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Mock week: shakeout + mobility", "Cool-down + mobility (~8–10 min)"]}], "12": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "TAPER: easy shuttles 2×4 rounds, technique", "Test", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "TAPER: HRPU 2×submax, crisp", "Light movement", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "TAPER: 4×20s strides on turf", "Rest", "Cool-down + mobility (~8–10 min)"]}]}, "Farber": {"1": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "4×400m @ comfortable-hard / 200m walk", "CLRC 3×12, dead bug 3×10/s, SP 2×30s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "PU 4×(max−2)", "KBS 3×12 (hinge), KB row 3×10/s, GS 3×10, SU 3×8/leg", "CLRC 3×12", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Steady run 12 min easy + 4×100m strides", "Mobility: hips/hams/thoracic + low-back decompression", "Cool-down + mobility (~8–10 min)"]}], "2": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "5×400m / 200m walk", "CLRC 3×15, dead bug 3×12/s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "PU 4×(max−1)", "KBS 3×15, row 3×12/s, GS 3×12, SU 3×10/leg", "CLRC 3×15", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Steady 15 min + 5×100m strides", "Cool-down + mobility (~8–10 min)"]}], "3": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "6×400m / 200m walk", "CLRC 3×18, SP 2×40s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "PU 5×(max−1)", "KBS 4×15, row 4×10/s, GS 4×12", "Bird-dog 3×10/s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Steady 18 min + 6×100m strides", "Cool-down + mobility (~8–10 min)"]}], "4": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "4×600m / 200m walk", "CLRC 4×15, bird-dog 3×10/s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "PU 4×max + tempo set", "KBS 4×18, GS 4×12", "CLRC 3×18", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Tempo 1.5 mi @ moderate", "Mobility", "Cool-down + mobility (~8–10 min)"]}], "5": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "4×800m @ goal / 400 walk", "CLRC 4×18", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "PU 5×near-max + AMRAP", "KBS 5×15, row 4×12/s, GS 4×14", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Tempo 2 mi, build pace", "Pacing by splits", "Cool-down + mobility (~8–10 min)"]}], "6": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "MOCK: 2-mile time trial — record time", "Light core", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Deload: PU 3×submax, mobility", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Mock week: 15 min easy + mobility", "Cool-down + mobility (~8–10 min)"]}], "7": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "5×800m @ goal / 400 walk", "CLRC 4×18, dead bug 3×12/s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "PU EMOM 8 min", "KBS 5×18, row 5×10/s, GS 5×12", "CLRC 4×15", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Tempo 2 mi @ ~goal", "Strides 4×150m", "Cool-down + mobility (~8–10 min)"]}], "8": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "3×1-mile @ goal / 400 walk", "SP 3×40s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "PU 5×max + cluster", "KBS heavy 5×15, FC 4×40yd", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "20–24 min progression run (easy→goal)", "Mobility", "Cool-down + mobility (~8–10 min)"]}], "9": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "2-mile tempo @ ~goal", "CLRC 5×15", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "PU density: max in 5 min (→49)", "KBS 5×20, GS 5×15", "CLRC 4×18", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Goal-pace: 2×1 mi @ goal / 3 min walk", "Cool-down + mobility (~8–10 min)"]}], "10": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "5×800m @ faster-than-goal", "CLRC 5×18, bird-dog 3×12/s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "PU 6×near-max", "FC 4×40yd, KBS 5×18", "SP 3×40s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Tempo 2 mi faster than Wk7", "Strides", "Cool-down + mobility (~8–10 min)"]}], "11": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "MOCK PFRA — all components", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Deload (mock wk): PU 3×submax", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Mock week: shakeout + mobility", "Cool-down + mobility (~8–10 min)"]}], "12": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "TAPER: 3×400m @ goal, easy", "Test", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "TAPER: PU 2×submax, crisp", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "TAPER: 4×150m strides", "Rest", "Cool-down + mobility (~8–10 min)"]}]}, "Spruill": {"1": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Turf brisk walk 6×(2 min / 1 min easy)", "SU 3×8/leg", "STOP at any back pain", "CLRC 3×10, dead bug 3×8/s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "IPU (high bleacher step) 4×(max−2)", "KB DL 3×10 (groove hinge), KB row 3×10/s, sit-to-stand 3×10", "CLRC 3×10", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Bleacher stair intervals 6×(45s up-tempo / 75s easy)", "Walk 10 min", "Mobility: hip flexors, knees-to-chest, thoracic", "Cool-down + mobility (~8–10 min)"]}], "2": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Walk-jog 6×(2 min brisk walk + 20s easy jog / 1 min)", "SU 3×10/leg", "CLRC 3×12", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "IPU 4×(max−1)", "KB DL 3×12, row 3×12/s, GS light 3×10", "CLRC 3×12", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Stair intervals 7×(45s / 75s)", "Walk 12 min", "Mobility", "Cool-down + mobility (~8–10 min)"]}], "3": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Walk-jog 7×(90s walk + 30s jog / 60s)", "Bleacher stair climb 4×(up/down)", "CLRC 3×12, dead bug 3×10/s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "IPU 5×(max−1) [lower the step]", "KB DL 4×10, SU 3×8/leg", "SP from knees 2×20s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Stair intervals 8×(45s / 75s)", "KBS 4×15 (conditioning)", "Mobility", "Cool-down + mobility (~8–10 min)"]}], "4": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Turf shuttle intro: 6×(20m jog shuttle ~25s / 95s walk)", "SU 4×10/leg", "CLRC 3×15", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "IPU 4×max + 1 tempo set", "KB DL 4×12, FC 3×30yd (suitcase, brace core)", "CLRC 3×15", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Turf shuttle tempo 5×(25s jog shuttle / 95s walk)", "Stair 4×", "Mobility", "Cool-down + mobility (~8–10 min)"]}], "5": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR-style 7×(30s shuttle / 90s walk) turf", "Stair climb 5×", "CLRC 4×12", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "IPU 5×near-max [lower step]", "KBS 4×12, GS 3×12, SU 3×10/leg", "CLRC 3×15", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Shuttle tempo 6×(30s / 90s)", "KBS 5×15", "Mobility", "Cool-down + mobility (~8–10 min)"]}], "6": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "MOCK: max HAMR shuttles (record) OR 2-mile walk/jog for time — set the baseline", "Light core", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Deload (mock wk): IPU 3×submax, mobility, hinge practice", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Mock week: easy 15 min walk + mobility + hinge drills", "Cool-down + mobility (~8–10 min)"]}], "7": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR 8×(30s / 90s), push pace", "Weighted SU (1 KB) 3×8/leg", "CLRC 4×12", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "IPU 5×near-max [step lower again]", "KB DL 4×12, KBS 4×15, FC 4×40yd", "CLRC 4×12", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Shuttle tempo 7×(30s / 90s) faster", "Stair 6×", "Mobility", "Cool-down + mobility (~8–10 min)"]}], "8": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR 8×(35s / 85s)", "KBS intervals 4×(20s swing / 40s rest)", "CLRC 4×15", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "IPU 5×max + cluster", "KBS 5×15, weighted SU 3×10/leg", "SP knees 3×25s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Shuttle 6×(40s / 80s) + KB carry circuit 4×40yd", "Mobility", "Cool-down + mobility (~8–10 min)"]}], "9": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR 9×(35s / 85s) + 2-mile tolerance walk-jog 10 min (monitor back)", "Stair 6×", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "IPU density: max reps in 4 min [lower step]", "KB DL 5×10, GS 4×12, FC 4×40yd", "CLRC 4×15", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Walk-jog tolerance 12 min continuous (monitor back) + shuttle 4×(30s / 90s)", "Mobility", "Cool-down + mobility (~8–10 min)"]}], "10": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "HAMR 10×(40s / 80s), push level", "KBS 5×20", "CLRC 4×15, SP knees 2×20s", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "IPU 6×near-max + attempt 1 set floor push-ups", "KBS 5×18, carries 4×40yd", "CLRC 4×15", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Shuttle 8×(40s / 70s) @ fast", "Stair 6×", "Mobility", "Cool-down + mobility (~8–10 min)"]}], "11": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "MOCK PFRA — score HAMR (or 2-mile), push-ups, CLRC, waist", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Deload (mock wk): IPU 3×submax, mobility", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "Mock week: shakeout + mobility", "Cool-down + mobility (~8–10 min)"]}], "12": [{"name": "Session 1 — Engine (Cardio + Core)", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "TAPER: easy shuttles 2×4 rounds, technique", "Test / measure", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 2 — Strength Circuit", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "TAPER: IPU 2×submax, crisp", "Light hinge", "Cool-down + mobility (~8–10 min)"]}, {"name": "Session 3 — Tempo / Skills + Mobility", "items": ["Warm-up — dynamic warm-up (~8–10 min)", "TAPER: easy stair 3× + brisk walk", "Rest", "Rehearse anxiety/breathing routine", "Cool-down + mobility (~8–10 min)"]}]}}}};
+
+/* ---------------- WHtR ---------------- */
+function whtrPoints(waist,height){
+  if(!waist||!height) return null;
+  const r = Math.round((waist/height)*100)/100;
+  const map={0.49:20,0.50:19,0.51:18,0.52:17,0.53:16,0.54:15,0.55:12.5,0.56:10,0.57:7.5,0.58:5,0.59:2.5};
+  let pts; if(r<=0.49)pts=20; else if(r>=0.60)pts=0; else pts=map[r]!==undefined?map[r]:0;
+  return {ratio:r.toFixed(2),pts};
+}
+
+/* ---------------- Tabs ---------------- */
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); document.getElementById(b.dataset.tab).classList.add('active');
+  if(b.dataset.tab==='dash') renderDash();
+  if(b.dataset.tab==='hist') renderHist();
+  if(b.dataset.tab==='workouts') renderWorkouts();
+  if(b.dataset.tab==='train') renderTrain();
+});
+
+/* ---------------- Populate selects ---------------- */
+function fillAthletes(){
+  ['f_athlete','h_athlete'].forEach(id=>{
+    const s=document.getElementById(id); s.innerHTML='';
+    NAMES.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;s.appendChild(o);});
+  });
+}
+fillAthletes();
+document.getElementById('f_date').value=new Date().toISOString().slice(0,10);
+// default cardio type per athlete
+function syncCardioDefault(){
+  const a=document.getElementById('f_athlete').value;
+  document.getElementById('f_cardioType').value = ATH[a].cardioPick==="2-mile run" ? "2-mile run (mm:ss)" : "20m HAMR (shuttles)";
+}
+document.getElementById('f_athlete').onchange=syncCardioDefault; syncCardioDefault();
+
+/* session chips */
+document.querySelectorAll('#f_sessions .chip').forEach(c=>c.onclick=()=>c.classList.toggle('on'));
+
+/* ---------------- Save entry ---------------- */
+function flash(msg){const f=document.getElementById('flash');f.textContent=msg;f.classList.add('show');setTimeout(()=>f.classList.remove('show'),1400);}
+document.getElementById('saveBtn').onclick=()=>{
+  const g=id=>document.getElementById(id).value.trim();
+  const sessions=[...document.querySelectorAll('#f_sessions .chip.on')].map(c=>c.dataset.s);
+  const e={
+    id:Date.now(), athlete:g('f_athlete'), date:g('f_date'),
+    weight:g('f_weight'), waist:g('f_waist'),
+    cardioType:g('f_cardioType'), cardio:g('f_cardio'),
+    upperType:g('f_upperType'), upper:g('f_upper'),
+    coreType:g('f_coreType'), core:g('f_core'),
+    steps:g('f_steps'), sleep:g('f_sleep'), rpe:g('f_rpe'),
+    sessions, pain:g('f_pain'), notes:g('f_notes')
+  };
+  if(!e.date){alert('Pick a date');return;}
+  DB.logs.push(e); save(DB);
+  ['f_weight','f_waist','f_cardio','f_upper','f_core','f_steps','f_sleep','f_rpe','f_notes'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('#f_sessions .chip').forEach(c=>c.classList.remove('on'));
+  document.getElementById('f_pain').value='';
+  flash('Saved ✓'); renderDash();
+};
+
+/* ---------------- Dashboard ---------------- */
+function latest(name, field){
+  const rows=DB.logs.filter(l=>l.athlete===name && l[field]!=='' && l[field]!=null).sort((a,b)=>a.date<b.date?-1:1);
+  return rows.length?rows[rows.length-1]:null;
+}
+function renderDash(){
+  const host=document.getElementById('dash'); host.innerHTML='';
+  const intro=document.createElement('div'); intro.className='card';
+  const totalLogs=DB.logs.length;
+  intro.innerHTML=`<h2>Squad dashboard</h2><p class="muted">${totalLogs} total entries logged. Tap “Log Entry” to add today's numbers. WHtR points use the 1&nbsp;Mar&nbsp;2026 PFRA table (20&nbsp;pts max).</p>`;
+  host.appendChild(intro);
+  const grid=document.createElement('div'); grid.className='grid';
+  NAMES.forEach(n=>{
+    const a=ATH[n];
+    const lw=latest(n,'weight'), lwa=latest(n,'waist'), lc=latest(n,'cardio'), lu=latest(n,'upper'), lco=latest(n,'core');
+    const last=DB.logs.filter(l=>l.athlete===n).sort((x,y)=>x.date<y.date?-1:1).slice(-1)[0];
+    let waistVal = lwa?parseFloat(lwa.waist):a.base.waist;
+    const w=whtrPoints(waistVal,a.heightIn);
+    function deltaTxt(now,base,inv){ if(now==null)return''; const d=now-base; if(Math.abs(d)<0.01)return ''; const goodDown=inv?d<0:d>0; return `<span class="delta ${goodDown?'up':'down'}">${d>0?'+':''}${(Math.round(d*10)/10)}</span>`; }
+    const wNow=lw?parseFloat(lw.weight):null;
+    const card=document.createElement('div'); card.className='card';
+    card.innerHTML=`
+      <div class="athletehdr"><span class="dot" style="background:${a.color}"></span><h2 style="margin:0">${n}</h2><span class="muted" style="margin-left:auto">${a.grp}</span></div>
+      <div class="stat"><span>Weight</span><span><b>${wNow??a.base.weight} lb</b>${wNow!=null?deltaTxt(wNow,a.base.weight,true):''} <span class="muted">→ ${a.target.weightNote}</span></span></div>
+      <div class="stat"><span>Waist</span><span><b>${waistVal} in</b>${lwa?deltaTxt(waistVal,a.base.waist,true):''} <span class="muted">→ ${a.target.waist}"</span></span></div>
+      <div class="stat"><span>WHtR (pts)</span><span><b>${w.ratio}</b> <span class="pill ${w.pts>=15?'good':w.pts>=7.5?'warn':'bad'}">${w.pts}/20</span></span></div>
+      <div class="stat"><span>Cardio</span><span><b>${lc?lc.cardio:'—'}</b> <span class="muted">${a.minNote}</span></span></div>
+      <div class="stat"><span>Upper</span><span><b>${lu?lu.upper:'—'}</b> <span class="muted">→ ${a.target.upper}</span></span></div>
+      <div class="stat"><span>Core</span><span><b>${lco?lco.core:'—'}</b> <span class="muted">→ ${a.target.core}</span></span></div>
+      <div class="stat" style="border:none"><span>Last entry</span><span><b>${last?last.date:'—'}</b>${last&&last.pain&&last.pain[0]>='2'?' <span class="pill bad">back '+last.pain[0]+'</span>':''}</span></div>
+      <div class="muted" style="margin-top:6px;font-size:11px">Baseline: ${a.base.weight} lb · ${a.base.waist}" · ${a.base.cardio} · ${a.base.upper} · ${a.base.core}</div>`;
+    grid.appendChild(card);
+  });
+  host.appendChild(grid);
+}
+
+/* ---------------- History ---------------- */
+function renderHist(){
+  const n=document.getElementById('h_athlete').value;
+  const rows=DB.logs.filter(l=>l.athlete===n).sort((a,b)=>a.date<b.date?1:-1);
+  const host=document.getElementById('histTable');
+  if(!rows.length){host.innerHTML='<p class="muted">No entries yet.</p>';return;}
+  let h='<table><thead><tr><th>Date</th><th>Wt</th><th>Waist</th><th>WHtR</th><th>Cardio</th><th>Upper</th><th>Core</th><th>Steps</th><th>Sleep</th><th>RPE</th><th>Sess</th><th>Pain</th><th>Notes</th><th></th></tr></thead><tbody>';
+  rows.forEach(r=>{
+    const w=r.waist?whtrPoints(parseFloat(r.waist),ATH[n].heightIn):null;
+    h+=`<tr><td>${r.date}</td><td>${r.weight||''}</td><td>${r.waist||''}</td><td>${w?w.ratio+' ('+w.pts+')':''}</td>
+    <td>${r.cardio||''}</td><td>${r.upper||''}</td><td>${r.core||''}</td><td>${r.steps||''}</td><td>${r.sleep||''}</td>
+    <td>${r.rpe||''}</td><td>${(r.sessions||[]).join('')}</td><td>${r.pain?r.pain[0]:''}</td><td>${(r.notes||'').replace(/</g,'&lt;')}</td>
+    <td><button class="btn small danger" onclick="delEntry(${r.id})">×</button></td></tr>`;
+  });
+  h+='</tbody></table>'; host.innerHTML=h;
+}
+document.getElementById('h_athlete').onchange=renderHist;
+window.delEntry=function(id){ if(!confirm('Delete this entry?'))return; DB.logs=DB.logs.filter(l=>l.id!==id); save(DB); renderHist(); };
+document.getElementById('csvBtn').onclick=()=>{
+  const n=document.getElementById('h_athlete').value;
+  const rows=DB.logs.filter(l=>l.athlete===n).sort((a,b)=>a.date<b.date?-1:1);
+  const cols=['date','weight','waist','cardioType','cardio','upperType','upper','coreType','core','steps','sleep','rpe','sessions','pain','notes'];
+  let csv=cols.join(',')+'\n';
+  rows.forEach(r=>{csv+=cols.map(c=>{let v=r[c]; if(Array.isArray(v))v=v.join(' '); v=(v==null?'':(''+v)).replace(/"/g,'""'); return /[",\n]/.test(v)?'"'+v+'"':v;}).join(',')+'\n';});
+  dl(csv,`FIP_${n}_history.csv`,'text/csv');
+};
+
+/* ---------------- Data tab ---------------- */
+function dl(content,name,type){const b=new Blob([content],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
+document.getElementById('exportBtn').onclick=()=>dl(JSON.stringify(DB,null,2),'FIP_companion_backup.json','application/json');
+document.getElementById('importBtn').onclick=()=>{
+  try{const d=JSON.parse(document.getElementById('importBox').value); if(!d.logs)throw 0; DB=d; save(DB); flash('Imported ✓'); renderDash();}
+  catch(e){alert("That does not look like valid backup JSON.");}
+};
+document.getElementById('resetBtn').onclick=()=>{ if(confirm('Erase ALL logged data on this device? Export first if unsure.')){DB={logs:[]};save(DB);renderDash();renderHist();flash('Cleared');} };
+
+/* ================= HAMR TIMER ================= */
+const LEVELS=[];
+(function(){
+  const shuttles=[7,8,8,9,9,10,10,11,11,11,12,12,13,13,13,14,14,15,15,16,16];
+  for(let i=0;i<shuttles.length;i++){LEVELS.push({lvl:i+1, kmh:8.0+i*0.5, shuttles:shuttles[i]});}
+})();
+// build schedule of beeps: {t, type:'start'|'shuttle'|'levelup', lvl, sInLvl, total, kmh}
+function buildSchedule(){
+  const sch=[]; let t=0, total=0;
+  sch.push({t:0,type:'start',lvl:1,sInLvl:0,total:0,kmh:LEVELS[0].kmh});
+  for(const L of LEVELS){
+    const st=72/L.kmh; // seconds per 20m shuttle
+    for(let s=1;s<=L.shuttles;s++){
+      t+=st; total++;
+      const nextLevelStart=(s===L.shuttles);
+      sch.push({t, type: nextLevelStart?'levelup':'shuttle', lvl:L.lvl, sInLvl:s, total, kmh:L.kmh});
+    }
+  }
+  return sch;
+}
+let SCH=buildSchedule();
+
+// render level table
+(function(){
+  let h='<table><thead><tr><th>Lvl</th><th>km/h</th><th>Shuttles</th><th>Sec/shuttle</th><th>Cumulative</th></tr></thead><tbody>';
+  let cum=0;
+  LEVELS.forEach(L=>{cum+=L.shuttles; h+=`<tr><td>${L.lvl}</td><td>${L.kmh.toFixed(1)}</td><td>${L.shuttles}</td><td>${(72/L.kmh).toFixed(2)}</td><td>${cum}</td></tr>`;});
+  h+='</tbody></table>'; document.getElementById('lvlTable').innerHTML=h;
+})();
+
+let actx=null, master=null, running=false, t0=0, schedIdx=0, schedTimer=null, rafId=null, countdownTimer=null, wakeLock=null;
+const vol=document.getElementById('vol');
+function ensureCtx(){ if(!actx){actx=new (window.AudioContext||window.webkitAudioContext)(); master=actx.createGain(); master.connect(actx.destination);} master.gain.value=parseFloat(vol.value); }
+vol.oninput=()=>{if(master)master.gain.value=parseFloat(vol.value);};
+function tone(at,freq,dur){ const o=actx.createOscillator(),g=actx.createGain(); o.type='sine'; o.frequency.value=freq; o.connect(g); g.connect(master);
+  g.gain.setValueAtTime(0,at); g.gain.linearRampToValueAtTime(1,at+0.005); g.gain.setValueAtTime(1,at+dur-0.03); g.gain.linearRampToValueAtTime(0,at+dur); o.start(at); o.stop(at+dur+0.02); }
+function beepAt(at,type){ if(type==='levelup'){tone(at,1320,0.12);tone(at+0.16,1320,0.12);tone(at+0.32,1320,0.16);} else if(type==='start'){tone(at,880,0.4);} else {tone(at,1000,0.11);} }
+
+function fmt(s){const m=Math.floor(s/60),x=Math.floor(s%60);return String(m).padStart(2,'0')+':'+String(x).padStart(2,'0');}
+function setStage(b){
+  document.getElementById('hamrBig').textContent = b.type==='start'?'GO':(b.lvl+'.'+b.sInLvl);
+  document.getElementById('hamrSub2').textContent = b.type==='start'?'start running on the beep':('Level '+b.lvl+' · shuttle '+b.sInLvl+' of '+LEVELS[b.lvl-1].shuttles);
+  document.getElementById('hTotal').textContent=b.total;
+  document.getElementById('hLevel').textContent=b.lvl;
+  document.getElementById('hSpeed').textContent=b.kmh.toFixed(1);
+  const cue=document.getElementById('runCue'); cue.classList.add('flash'); setTimeout(()=>cue.classList.remove('flash'),140);
+}
+function startHamr(){
+  if(running) return; ensureCtx(); if(actx.state==='suspended')actx.resume();
+  try{ if('wakeLock' in navigator) navigator.wakeLock.request('screen').then(w=>wakeLock=w).catch(()=>{}); }catch(e){}
+  // 5s visual countdown
+  let c=5; document.getElementById('hamrBig').textContent=c; document.getElementById('hamrSub').textContent='Get ready…';
+  document.getElementById('hamrSub2').textContent='starting in';
+  countdownTimer=setInterval(()=>{ c--; if(c>0){document.getElementById('hamrBig').textContent=c; tone(actx.currentTime,660,0.1);}
+    else{clearInterval(countdownTimer); beginRun();} },1000);
+  running='count';
+}
+function beginRun(){
+  running=true; schedIdx=0; t0=actx.currentTime+0.15;
+  document.getElementById('hamrSub').textContent='RUNNING — reach the line before each beep';
+  // scheduler lookahead
+  schedTimer=setInterval(()=>{
+    const now=actx.currentTime;
+    while(schedIdx<SCH.length && t0+SCH[schedIdx].t < now+0.18){
+      const b=SCH[schedIdx]; beepAt(t0+b.t,b.type); schedIdx++;
+    }
+    if(schedIdx>=SCH.length){ /* test complete */ }
+  },25);
+  // display loop
+  let shownIdx=-1;
+  function loop(){
+    if(!running) return;
+    const el=actx.currentTime-t0;
+    document.getElementById('hClock').textContent=fmt(Math.max(0,el))+' elapsed';
+    // advance display to the last beep whose time has passed
+    let i=shownIdx;
+    while(i+1<SCH.length && SCH[i+1].t<=el+0.02) i++;
+    if(i!==shownIdx && i>=0){ shownIdx=i; setStage(SCH[i]); }
+    rafId=requestAnimationFrame(loop);
+  }
+  rafId=requestAnimationFrame(loop);
+}
+function stopHamr(){
+  running=false; if(schedTimer)clearInterval(schedTimer); if(countdownTimer)clearInterval(countdownTimer); if(rafId)cancelAnimationFrame(rafId);
+  if(wakeLock){try{wakeLock.release();}catch(e){} wakeLock=null;}
+  document.getElementById('hamrSub').textContent='Stopped. TOTAL SHUTTLES = the score to log. Press Start to run again.';
+}
+document.getElementById('startBtn').onclick=startHamr;
+document.getElementById('stopBtn').onclick=()=>{ stopHamr(); document.getElementById('hamrBig').textContent='—'; };
+
+
+/* ================= WORKOUTS ================= */
+function setupWorkouts(){
+  const ps=document.getElementById('w_prog'); ps.innerHTML='';
+  Object.keys(PROGRAMS).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=PROGRAMS[k].label;ps.appendChild(o);});
+  const as=document.getElementById('w_ath'); as.innerHTML='';
+  ['__all__',...NAMES].forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=(n==='__all__'?'Everyone (overview)':n);as.appendChild(o);});
+  ps.onchange=()=>{fillWeeks();renderWorkouts();};
+  document.getElementById('w_week').onchange=renderWorkouts;
+  as.onchange=renderWorkouts;
+  fillWeeks();
+}
+function fillWeeks(){
+  const k=document.getElementById('w_prog').value; const ws=document.getElementById('w_week'); const cur=ws.value;
+  ws.innerHTML='';
+  for(let w=1;w<=PROGRAMS[k].weeks;w++){const o=document.createElement('option');o.value=w;o.textContent='Week '+w;ws.appendChild(o);}
+  if(cur && cur<=PROGRAMS[k].weeks) ws.value=cur;
+}
+function dkey(prog,ath,wk,si,ii){return prog+'|'+ath+'|'+wk+'|'+si+'|'+ii;}
+function sessProgress(prog,ath,wk,si){
+  const items=PROGRAMS[prog].data[ath][wk][si].items; let d=0;
+  items.forEach((_,ii)=>{if(DB.done[dkey(prog,ath,wk,si,ii)])d++;});
+  return {d,t:items.length};
+}
+function renderWorkouts(){
+  const prog=document.getElementById('w_prog').value, wk=+document.getElementById('w_week').value, ath=document.getElementById('w_ath').value;
+  const host=document.getElementById('w_body'); host.innerHTML='';
+  if(!prog||!wk) return;
+  if(ath==='__all__'){
+    const card=document.createElement('div'); card.className='card';
+    let h='<h2>Everyone — Week '+wk+' ('+PROGRAMS[prog].label+')</h2><div class="scroll"><table class="ovtbl"><thead><tr><th>Airman</th><th>Session A</th><th>Session B</th><th>Session C</th></tr></thead><tbody>';
+    NAMES.forEach(n=>{
+      h+='<tr><td><button class="lnk" onclick="openAth(\''+n+'\')">'+n+'</button></td>';
+      for(let si=0;si<3;si++){const p=sessProgress(prog,n,wk,si);const cls=p.d===0?'neu':(p.d===p.t?'good':'warn');
+        h+='<td class="cell" onclick="openAth(\''+n+'\')"><span class="pill '+cls+'">'+p.d+'/'+p.t+'</span></td>';}
+      h+='</tr>';
+    });
+    h+='</tbody></table></div><p class="muted">Tap an Airman to open and check off their sessions.</p>';
+    card.innerHTML=h; host.appendChild(card); return;
+  }
+  // single athlete detail
+  const sessions=PROGRAMS[prog].data[ath][wk];
+  sessions.forEach((s,si)=>{
+    const p=sessProgress(prog,ath,wk,si);
+    const card=document.createElement('div'); card.className='card';
+    let h='<div class="athletehdr"><span class="dot" style="background:'+ATH[ath].color+'"></span><h2 style="margin:0;font-size:14px">'+s.name+'</h2>'
+      +(s.min?'<span class="muted" style="margin-left:auto">main ≈ '+s.min+' min</span>':'')+'</div>';
+    h+='<div class="progress"><i style="width:'+(p.t?Math.round(p.d/p.t*100):0)+'%"></i></div>';
+    h+='<div class="muted" id="pl_'+si+'">'+p.d+' / '+p.t+' done</div>';
+    s.items.forEach((it,ii)=>{
+      const key=dkey(prog,ath,wk,si,ii); const on=!!DB.done[key];
+      h+='<label class="witem'+(on?' done':'')+'"><input type="checkbox" '+(on?'checked':'')+' onchange="toggleItem(this,\''+prog+'\',\''+ath+'\','+wk+','+si+','+ii+')"><span>'+it.replace(/</g,'&lt;')+'</span></label>';
+    });
+    h+='<div class="wtools"><button class="btn small ghost" onclick="resetSess(\''+prog+'\',\''+ath+'\','+wk+','+si+')">Reset session</button>'
+      +'<button class="btn small alt" onclick="document.querySelector(\'nav button[data-tab=hamr]\').click()">Open timers ⏱</button></div>';
+    card.innerHTML=h; host.appendChild(card);
+  });
+}
+window.openAth=function(n){document.getElementById('w_ath').value=n;renderWorkouts();window.scrollTo({top:0,behavior:'smooth'});};
+window.toggleItem=function(el,prog,ath,wk,si,ii){
+  const key=dkey(prog,ath,wk,si,ii); if(el.checked)DB.done[key]=1; else delete DB.done[key]; save(DB);
+  el.closest('.witem').classList.toggle('done',el.checked);
+  const p=sessProgress(prog,ath,wk,si); const lbl=document.getElementById('pl_'+si); if(lbl){lbl.textContent=p.d+' / '+p.t+' done'; lbl.previousElementSibling.firstChild.style.width=(p.t?Math.round(p.d/p.t*100):0)+'%';}
+};
+window.resetSess=function(prog,ath,wk,si){
+  const items=PROGRAMS[prog].data[ath][wk][si].items;
+  items.forEach((_,ii)=>delete DB.done[dkey(prog,ath,wk,si,ii)]); save(DB); renderWorkouts();
+};
+
+/* ================= INTERVAL TIMER ================= */
+let ivPhases=[], ivIdx=0, ivStart=0, ivRun=false, ivTimer=null, ivLastSec=null;
+function ivToneFor(name){ if(name==='WORK')tone(actx.currentTime,1000,0.2); else if(name==='REST')tone(actx.currentTime,600,0.2); else tone(actx.currentTime,880,0.28); }
+function startIv(){
+  if(ivRun)return; ensureCtx(); if(actx.state==='suspended')actx.resume();
+  const work=Math.max(5,+document.getElementById('iv_work').value||40);
+  const rest=Math.max(0,+document.getElementById('iv_rest').value||20);
+  const rounds=Math.max(1,+document.getElementById('iv_rounds').value||1);
+  ivPhases=[{n:'GET READY',d:5,r:0}];
+  for(let r=1;r<=rounds;r++){ ivPhases.push({n:'WORK',d:work,r,rounds}); if(rest>0 && r<rounds) ivPhases.push({n:'REST',d:rest,r,rounds}); }
+  ivIdx=0; ivStart=actx.currentTime; ivRun=true; ivLastSec=null; ivToneFor(ivPhases[0].n);
+  ivTimer=setInterval(ivTick,80); ivTick();
+}
+function ivTick(){
+  if(!ivRun)return; const p=ivPhases[ivIdx]; const el=actx.currentTime-ivStart; let rem=Math.max(0,p.d-el);
+  const r=Math.ceil(rem); if(r<=3&&r>=1&&r!==ivLastSec){tone(actx.currentTime,1500,0.07);ivLastSec=r;}
+  const st=document.getElementById('ivStage'); st.className=(p.n==='WORK'?'work':p.n==='REST'?'rest':'prep');
+  document.getElementById('ivPhase').textContent=p.n;
+  document.getElementById('ivBig').textContent=Math.ceil(rem);
+  document.getElementById('ivRound').textContent=p.r?('round '+p.r+' / '+p.rounds):'get ready';
+  if(rem<=0.001){ ivIdx++; ivLastSec=null; if(ivIdx>=ivPhases.length){finishIv();return;} ivStart=actx.currentTime; ivToneFor(ivPhases[ivIdx].n); }
+}
+function finishIv(){ ivRun=false; clearInterval(ivTimer); tone(actx.currentTime,1320,0.15);tone(actx.currentTime+0.2,1320,0.15);tone(actx.currentTime+0.4,1320,0.25);
+  const st=document.getElementById('ivStage'); st.className='prep'; document.getElementById('ivPhase').textContent='DONE'; document.getElementById('ivBig').textContent='✓'; document.getElementById('ivRound').textContent='circuit complete'; }
+function stopIv(){ ivRun=false; if(ivTimer)clearInterval(ivTimer); const st=document.getElementById('ivStage'); st.className='prep'; document.getElementById('ivPhase').textContent='READY'; document.getElementById('ivBig').textContent='--'; document.getElementById('ivRound').textContent='round 0 / 0'; }
+document.getElementById('ivStart').onclick=startIv;
+document.getElementById('ivStop').onclick=stopIv;
+
+
+
+/* ================= THEME ================= */
+function applyTheme(){ if(localStorage.getItem('fipTheme')==='dark')document.body.classList.add('dark'); const b=document.getElementById('themeBtn'); if(b)b.innerHTML=document.body.classList.contains('dark')?'☀':'☾'; }
+function toggleTheme(){ document.body.classList.toggle('dark'); localStorage.setItem('fipTheme',document.body.classList.contains('dark')?'dark':'light'); applyTheme(); }
+
+/* ================= CLOCK ================= */
+function startClock(){ const u=()=>{const e=document.getElementById('trainClock'); if(e)e.textContent=new Date().toLocaleTimeString();}; u(); setInterval(u,1000); }
+
+/* ================= TRAINING DAY ================= */
+const WARMUP_STEPS = ["Easy turf jog 3 min  (Spruill & Alvarado: brisk walk).", "Dynamic flow — one ~20 m turf length each, walk back: knee hugs · walking quad-pull · walking lunge + torso twist · lateral lunge · inchworm-to-push-up.", "Mobility: leg swings 10/leg (front-back & side-to-side) · arm circles + shoulder rolls · hip ‘gate’ openers 8/side · ankle rocks 10/side.", "Primers — 20 m each: high knees · butt kicks · A-skips · lateral shuffle (both directions).", "3 build-up strides (50 → 70 → 90% effort)."];
+const COOLDOWN_STEPS = ["Easy walk 3 min to bring the heart rate down.", "Static holds, 30 s each: standing quad · hip-flexor lunge · hamstring · calf (straight + bent knee) · figure-4 glute · chest/shoulder · child’s pose / cat-camel · knees-to-chest low-back decompression.", "Box breathing 2 min (in 4 · hold 4 · out 4 · hold 4) — down-regulate. (Doubles as Spruill’s test-day calm drill.)"];
+const SESS_LETTER=['A','B','C'];
+function setupTrain(){
+  const ps=document.getElementById('t_prog'); ps.innerHTML='';
+  Object.keys(PROGRAMS).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=PROGRAMS[k].label;ps.appendChild(o);});
+  ps.onchange=()=>{fillTW();renderTrain();};
+  document.getElementById('t_week').onchange=renderTrain;
+  document.getElementById('t_sess').onchange=renderTrain;
+  fillTW();
+}
+function fillTW(){
+  const k=document.getElementById('t_prog').value;
+  const ws=document.getElementById('t_week'),cw=ws.value; ws.innerHTML='';
+  for(let w=1;w<=PROGRAMS[k].weeks;w++){const o=document.createElement('option');o.value=w;o.textContent='Week '+w;ws.appendChild(o);}
+  if(cw&&cw<=PROGRAMS[k].weeks)ws.value=cw;
+  const ss=document.getElementById('t_sess'),cs=ss.value; ss.innerHTML='';
+  PROGRAMS[k].data.Jackson[1].forEach((s,i)=>{const o=document.createElement('option');o.value=i;o.textContent='Session '+SESS_LETTER[i];ss.appendChild(o);});
+  if(cs!=='')ss.value=cs;
+}
+function midItems(items){return items.slice(1,items.length-1).map((t,i)=>({t,idx:i+1}));}
+function renderTrain(){
+  const prog=document.getElementById('t_prog').value, wk=+document.getElementById('t_week').value, si=+document.getElementById('t_sess').value;
+  const host=document.getElementById('train_body'); host.innerHTML='';
+  if(!prog||!wk||isNaN(si))return;
+  const desc=PROGRAMS[prog].data.Jackson[wk][si].name.replace(/^[^—]*—\s*/,'');
+  const hdr=document.createElement('div');hdr.className='card';
+  hdr.innerHTML='<h2 style="margin:0">Session '+SESS_LETTER[si]+' &mdash; Week '+wk+'</h2><div class="muted">'+desc+' &middot; '+PROGRAMS[prog].label+'</div>';
+  host.appendChild(hdr);
+  host.appendChild(wcCard('Shared Warm-up (~10 min) — everyone does this together',WARMUP_STEPS,prog,wk,si,0));
+  const grid=document.createElement('div');grid.className='grid';
+  NAMES.forEach(n=>{
+    const s=PROGRAMS[prog].data[n][wk][si]; const card=document.createElement('div');card.className='card';
+    let h='<div class="athletehdr"><span class="dot" style="background:'+ATH[n].color+'"></span><h3 style="margin:0">'+n+'</h3>'+(s.min?'<span class="muted" style="margin-left:auto">&approx; '+s.min+' min</span>':'')+'</div>';
+    const mids=midItems(s.items); let dc=0; mids.forEach(m=>{if(DB.done[dkey(prog,n,wk,si,m.idx)])dc++;});
+    h+='<div class="progress"><i style="width:'+(mids.length?Math.round(dc/mids.length*100):0)+'%"></i></div>';
+    mids.forEach(m=>{const key=dkey(prog,n,wk,si,m.idx),on=!!DB.done[key];
+      h+='<label class="witem'+(on?' done':'')+'"><input type="checkbox" '+(on?'checked':'')+' onchange="toggleItem(this,\''+prog+'\',\''+n+'\','+wk+','+si+','+m.idx+')"><span>'+m.t.replace(/</g,'&lt;')+'</span></label>';});
+    h+=miniTimerHTML(n, parseCircuit(s.items));
+    card.innerHTML=h;grid.appendChild(card);
+  });
+  host.appendChild(grid);
+  wireTrainTimers();
+  const lastIdx=PROGRAMS[prog].data.Jackson[wk][si].items.length-1;
+  host.appendChild(wcCard('Shared Cool-down (~10 min) — everyone together',COOLDOWN_STEPS,prog,wk,si,lastIdx));
+}
+function wcCard(title,steps,prog,wk,si,itemIdx){
+  const card=document.createElement('div');card.className='card';
+  let h='<h2 style="font-size:14px">'+title+'</h2><ul class="muted" style="margin:4px 0 8px;padding-left:18px;font-size:12px">';
+  steps.forEach(s=>h+='<li>'+s.replace(/</g,'&lt;')+'</li>');h+='</ul>';
+  h+='<div class="wtools"><span class="muted" style="font-weight:700">Logged:</span><span class="chip" onclick="toggleWCAll(\''+prog+'\','+wk+','+si+','+itemIdx+')">All</span>';
+  NAMES.forEach(n=>{const on=!!DB.done[dkey(prog,n,wk,si,itemIdx)];
+    h+='<span class="chip'+(on?' on':'')+'" onclick="toggleWC(\''+prog+'\',\''+n+'\','+wk+','+si+','+itemIdx+',this)">'+n+'</span>';});
+  h+='</div>';card.innerHTML=h;return card;
+}
+window.toggleWC=function(prog,n,wk,si,ii,el){const key=dkey(prog,n,wk,si,ii);if(DB.done[key]){delete DB.done[key];el.classList.remove('on');}else{DB.done[key]=1;el.classList.add('on');}save(DB);};
+window.toggleWCAll=function(prog,wk,si,ii){const allOn=NAMES.every(n=>DB.done[dkey(prog,n,wk,si,ii)]);NAMES.forEach(n=>{const key=dkey(prog,n,wk,si,ii);if(allOn)delete DB.done[key];else DB.done[key]=1;});save(DB);renderTrain();};
+
+/* ===== per-trainee circuit clocks ===== */
+window.__trainTimers=[];
+function clearTrainTimers(){ window.__trainTimers.forEach(t=>{try{t.stop();}catch(e){}}); window.__trainTimers=[]; }
+function IntervalTimer(ids,basePitch){
+  let phases=[],idx=0,t0=0,run=false,timer=null,last=null;
+  const el=k=>document.getElementById(ids[k]);
+  function toneFor(n){ if(!actx)return; if(n==='WORK')tone(actx.currentTime,basePitch,0.18); else if(n==='REST')tone(actx.currentTime,Math.round(basePitch*0.62),0.18); else tone(actx.currentTime,Math.round(basePitch*0.85),0.26); }
+  function start(){ if(run)return; ensureCtx(); if(actx.state==='suspended')actx.resume();
+    const work=Math.max(1,+el('work').value||40),rest=Math.max(0,+el('rest').value||0),rounds=Math.max(1,+el('rounds').value||1);
+    phases=[{n:'READY',d:5,r:0}]; for(let r=1;r<=rounds;r++){phases.push({n:'WORK',d:work,r,rounds}); if(rest>0&&r<rounds)phases.push({n:'REST',d:rest,r,rounds});}
+    idx=0;t0=actx.currentTime;run=true;last=null;toneFor('READY');timer=setInterval(tick,80);tick(); }
+  function tick(){ if(!run)return; const p=phases[idx],e=actx.currentTime-t0; let rem=Math.max(0,p.d-e);
+    const r=Math.ceil(rem); if(r<=3&&r>=1&&r!==last){tone(actx.currentTime,1500,0.06);last=r;}
+    const st=el('stage'); if(!st){run=false;clearInterval(timer);return;}
+    st.className='ministage '+(p.n==='WORK'?'work':p.n==='REST'?'rest':'prep');
+    el('phase').textContent=p.n; el('big').textContent=Math.ceil(rem); el('round').textContent=p.r?('rd '+p.r+'/'+p.rounds):'get ready';
+    if(rem<=0.001){ idx++; last=null; if(idx>=phases.length){ run=false;clearInterval(timer);toneFor('WORK');st.className='ministage prep';el('phase').textContent='DONE';el('big').textContent='✓';el('round').textContent='';return;} t0=actx.currentTime; toneFor(phases[idx].n);} }
+  function stop(){ run=false; if(timer)clearInterval(timer); const st=el('stage'); if(st){st.className='ministage prep'; el('phase').textContent='READY'; el('big').textContent='--'; el('round').textContent='';} }
+  return {start,stop};
+}
+function parseCircuit(items){
+  for(const it of items){
+    const r=it.match(/Rounds\s+(\d+)/i);
+    const w=it.match(/Work\s+(\d+)\s*s/i)||it.match(/Brisk walk\s+(\d+)\s*s/i);
+    const rs=it.match(/Rest\s+(\d+)\s*s/i)||it.match(/Jog\s+(\d+)\s*s/i);
+    if(w&&rs&&r) return {work:+w[1],rest:+rs[1],rounds:+r[1]};
+    const tb=it.match(/(\d+)\s*[×x]\s*\(\s*(\d+)\s*s?\s*\/\s*(\d+)\s*s?\)/i);
+    if(tb) return {work:+tb[2],rest:+tb[3],rounds:+tb[1]};
+  }
+  return null;
+}
+function miniTimerHTML(n,cfg){
+  const w=cfg?cfg.work:40,r=cfg?cfg.rest:20,rd=cfg?cfg.rounds:5;
+  const lbl=cfg?('auto-set: '+w+'s on / '+r+'s off × '+rd+' rounds'):'no timed circuit today — set if needed';
+  return '<div class="ivmini"><div class="muted" style="font-size:11px;margin-bottom:4px">CIRCUIT CLOCK — '+lbl+'</div>'
+    +'<div class="ivinputs"><span>W<input id="miw_'+n+'" type="number" inputmode="numeric" value="'+w+'"></span>'
+    +'<span>R<input id="mir_'+n+'" type="number" inputmode="numeric" value="'+r+'"></span>'
+    +'<span>×<input id="mid_'+n+'" type="number" inputmode="numeric" value="'+rd+'"></span>'
+    +'<button class="btn small" id="mis_'+n+'">▶</button><button class="btn small ghost" id="mix_'+n+'">■</button></div>'
+    +'<div class="ministage prep" id="mst_'+n+'"><b id="mph_'+n+'">READY</b><span class="big" id="mbg_'+n+'">--</span><span class="muted" id="mrd_'+n+'"></span></div></div>';
+}
+function wireTrainTimers(){
+  clearTrainTimers();
+  const pitch={Jackson:1000,Alvarado:920,Farber:840,Spruill:1080};
+  NAMES.forEach(n=>{
+    const ids={work:'miw_'+n,rest:'mir_'+n,rounds:'mid_'+n,stage:'mst_'+n,phase:'mph_'+n,big:'mbg_'+n,round:'mrd_'+n};
+    const t=IntervalTimer(ids,pitch[n]||1000); window.__trainTimers.push(t);
+    const sb=document.getElementById('mis_'+n),xb=document.getElementById('mix_'+n);
+    if(sb)sb.onclick=()=>t.start(); if(xb)xb.onclick=()=>t.stop();
+  });
+}
+
+
+/* init */
+applyTheme();
+setupWorkouts();
+setupTrain();
+startClock();
+renderDash();
+</script>
+</body>
+</html>
